@@ -87,6 +87,13 @@ class BlobReportLimitingTest extends SystemTestCase
                     'xmlFieldsToRemove' => ['label', 'segment', 'url', 'exit_nb_visits', 'exit_rate', 'bounce_count', 'bounce_rate'],
                 ),
             ),
+
+            ['Events', [
+                'idSite' => 1,
+                'date' => '2015-02-03',
+                'period' => ['day'],
+                'testSuffix' => 'withNegOneLabel_',
+            ]],
         );
 
     }
@@ -123,6 +130,12 @@ class BlobReportLimitingTest extends SystemTestCase
                                                     'flat'               => 1,
                                                     'expanded'           => 0
                                                 ))),
+
+            ['Insights.getInsightsOverview', [
+                'idSite' => 1,
+                'date' => '2015-03-04',
+                'period' => ['day'],
+            ]],
         );
     }
 

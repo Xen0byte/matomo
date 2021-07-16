@@ -409,7 +409,8 @@ class FrontController extends Singleton
                 && Piwik::isUserIsAnonymous()
                 && $authAdapter->getLogin() === 'anonymous' //double checking the login
                 && Piwik::isUserHasSomeViewAccess()
-                && Session::isSessionStarted()) { // only if session was started, don't do it eg for API
+                && Session::isSessionStarted()
+                && Session::isWritable()) { // only if session was started and writable, don't do it eg for API
                 // usually the session would be started when someone logs in using login controller. But in this
                 // case we need to init session here for anoynymous users
                 $init = StaticContainer::get(SessionInitializer::class);
@@ -561,6 +562,11 @@ class FrontController extends Singleton
 
     private function handleProfiler()
     {
+        $profilerEnabled = Config::getInstance()->Debug['enable_php_profiler'] == 1;
+        if (!$profilerEnabled) {
+            return;
+        }
+
         if (!empty($_GET['xhprof'])) {
             $mainRun = $_GET['xhprof'] == 1; // core:archive command sets xhprof=2
             Profiler::setupProfilerXHProf($mainRun);
@@ -673,6 +679,10 @@ class FrontController extends Singleton
         ) { // don't use the session auth during CLI requests
             return null;
         }
+
+        if (Common::getRequestVar('token_auth', '', 'string') !== '' && !Common::getRequestVar('force_api_session', 0)) {
+             return null;
+         }
 
         $module = Common::getRequestVar('module', self::DEFAULT_MODULE, 'string');
         $action = Common::getRequestVar('action', false);

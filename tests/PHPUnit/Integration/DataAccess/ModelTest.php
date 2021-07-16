@@ -136,6 +136,55 @@ class ModelTest extends IntegrationTestCase
         $this->assertEquals($expected, $result);
     }
 
+    public function test_hasInvalidationForPeriodAndName_returnsTrueIfExists()
+    {
+        $date = '2021-03-23';
+        $this->insertInvalidations([
+            ['date1' => $date, 'date2' => $date, 'period' => 1, 'name' => 'done'],
+        ]);
+
+        $periodObj = Factory::build('day', $date);
+        $result = $this->model->hasInvalidationForPeriodAndName(1, $periodObj, 'done');
+        $this->assertTrue($result);
+    }
+
+    public function test_hasInvalidationForPeriodAndName_returnsTrueIfExistsForReport()
+    {
+        $date = '2021-03-23';
+        $this->insertInvalidations([
+            ['date1' => $date, 'date2' => $date, 'period' => 1, 'name' => 'done', 'report' => 'myReport'],
+        ]);
+
+        $periodObj = Factory::build('day', $date);
+        $result = $this->model->hasInvalidationForPeriodAndName(1, $periodObj, 'done', 'myReport');
+        $this->assertTrue($result);
+    }
+
+    public function test_hasInvalidationForPeriodAndName_returnsFalseIfNotExistsForReport()
+    {
+        $date = '2021-03-23';
+        $this->insertInvalidations([
+            ['date1' => $date, 'date2' => $date, 'period' => 1, 'name' => 'done', 'report' => 'myReport'],
+        ]);
+
+        $periodObj = Factory::build('day', $date);
+        $result = $this->model->hasInvalidationForPeriodAndName(1, $periodObj, 'done', 'otherReport');
+        $this->assertFalse($result);
+    }
+
+    public function test_hasInvalidationForPeriodAndName_returnsFalseIfNotExists()
+    {
+        $date = '2021-03-23';
+        $date2 = '2021-03-22';
+        $this->insertInvalidations([
+            ['date1' => $date, 'date2' => $date, 'period' => 1, 'name' => 'done'],
+        ]);
+
+        $periodObj = Factory::build('day', $date2);
+        $result = $this->model->hasInvalidationForPeriodAndName(1, $periodObj, 'done');
+        $this->assertFalse($result);
+    }
+
     public function getTestDataForHasChildArchivesInPeriod()
     {
         return [
@@ -331,6 +380,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '5',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '12',
@@ -341,6 +392,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '13',
@@ -351,6 +404,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done764644a7142bdcbedaab92f9dedef5e5',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '19',
@@ -361,6 +416,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '2',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '5',
@@ -371,6 +428,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '2',
                 'name' => 'done764644a7142bdcbedaab92f9dedef5e5',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '15',
@@ -381,6 +440,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '8',
@@ -391,6 +452,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '14',
@@ -401,6 +464,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '20',
@@ -411,6 +476,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '3',
@@ -421,6 +488,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done67564f109e3f4bba6b185a5343ff2bb0',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '2',
@@ -431,6 +500,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '10',
@@ -441,6 +512,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '3',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '17',
@@ -451,6 +524,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '3',
                 'name' => 'done67564f109e3f4bba6b185a5343ff2bb0',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '22',
@@ -461,6 +536,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '7',
@@ -471,6 +548,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '1',
@@ -481,6 +560,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done0bb102ea2ac682a578480dd184736607',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '16',
@@ -491,6 +572,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '2',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '6',
@@ -501,6 +584,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '9',
@@ -511,6 +596,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'doneb321434abb5a139c17dadf08c9d2e315',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '18',
@@ -521,6 +608,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '1',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '21',
@@ -531,6 +620,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '3',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
             array (
                 'idinvalidation' => '4',
@@ -541,6 +632,8 @@ class ModelTest extends IntegrationTestCase
                 'period' => '4',
                 'name' => 'done',
                 'report' => null,
+                'ts_started' => null,
+                'status' => 0,
             ),
         );
 
@@ -593,10 +686,10 @@ class ModelTest extends IntegrationTestCase
         $table = Common::prefixTable('archive_invalidations');
         $now = Date::now()->getDatetime();
         foreach ($invalidations as $invalidation) {
-            $sql = "INSERT INTO `$table` (idsite, date1, date2, period, `name`, status, ts_invalidated, ts_started) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO `$table` (idsite, date1, date2, period, `name`, status, ts_invalidated, ts_started, report) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Db::query($sql, [
                 $invalidation['idsite'] ?? 1, $invalidation['date1'], $invalidation['date2'], $invalidation['period'], $invalidation['name'],
-                $invalidation['status'] ?? 0, $invalidation['ts_invalidated'] ?? $now, $invalidation['ts_started'] ?? null,
+                $invalidation['status'] ?? 0, $invalidation['ts_invalidated'] ?? $now, $invalidation['ts_started'] ?? null, $invalidation['report'] ?? null,
             ]);
         }
     }

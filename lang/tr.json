@@ -16,6 +16,7 @@
         "Apply": "Uygula",
         "ArchivingInlineHelp": "Orta ve yüksek yoğunluklu web siteleri için Matomo arşivlemesinin web tarayıcı üzerinden tetiklenme seçeneğinin kapatılması öneriilir. Bunun yerine saatlik olarak Matomo raporlarını oluşturacak zamanlanmış bir görevin tanımlanması önerilir.",
         "ArchivingTriggerDescription": "Daha büyük Matomo kurulumları için raporları otomatik olarak işleyen bir %1$szamanlanmış görev%2$s oluşturulması önerilir.",
+        "ArchivingTriggerSegment": "Özel dilimlerin kullanılması arşivlerin işlenmesini tetikler.",
         "AuthenticationMethodSmtp": "SMTP kimlik doğrulama yöntemi",
         "AverageOrderValue": "Ortalama Sipariş Değeri",
         "AveragePrice": "Ortalama Fiyat",
@@ -524,7 +525,8 @@
         "Custom": "Özel",
         "PreviousPeriod": "Önceki Dönem",
         "PreviousYear": "Önceki Yıl",
-        "ViewAccessRequired": "Kullanılan kimlik doğrulama kodunun (token_auth) erişim izinleri, API dışı bir istek adresinde kullanılmak için çok fazla. Lütfen yalnız görüntüleme erişimi olan bir kullanıcı için uygulamaya özel bir parola kullanın."
+        "ViewAccessRequired": "Kullanılan kimlik doğrulama kodunun (token_auth) erişim izinleri, API dışı bir istek adresinde kullanılmak için çok fazla. Lütfen yalnız görüntüleme erişimi olan bir kullanıcı için uygulamaya özel bir parola kullanın.",
+        "Reasons": "Nedenler"
     },
     "Mobile": {
         "AboutPiwikMobile": "Matomo Mobil Hakkında",

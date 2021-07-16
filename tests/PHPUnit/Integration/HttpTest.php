@@ -8,6 +8,8 @@
 
 namespace Piwik\Tests\Integration;
 
+use Piwik\Container\StaticContainer;
+use Piwik\EventDispatcher;
 use Piwik\Http;
 use Piwik\Piwik;
 use Piwik\Tests\Framework\Fixture;
@@ -322,6 +324,43 @@ class HttpTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(51, strlen($result));
     }
 
+    /**
+     * @dataProvider getRedirectUrls
+     */
+    public function test_redirects($url, $method, $isValid, $message)
+    {
+        if ($isValid === false) {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessageMatches($message);
+        }
+
+        $response = Http::sendHttpRequestBy($method, $url, 1000);
+
+        if ($isValid !== false) {
+            $this->assertEquals($message, $response);
+        }
+    }
+
+    public function getRedirectUrls()
+    {
+        return [
+            // check 5 redirects are working
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=5', 'curl', true, Fixture::getRootUrl().'tests/resources/redirector.php?redirects=0'],
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=5', 'socket', true, Fixture::getRootUrl().'tests/resources/redirector.php?redirects=0'],
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=4', 'fopen', true, Fixture::getRootUrl().'tests/resources/redirector.php?redirects=0'],
+
+            // more than 5 redirects should fail
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=6', 'curl', false, '/curl_exec: Maximum \(5\) redirects followed./'],
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=6', 'socket', false, '/Too many redirects/'],
+            [Fixture::getRootUrl().'tests/resources/redirector.php?redirects=6', 'fopen', true, ''],
+
+            // Redirect to disallowed protocol shouldn't be possible
+            [Fixture::getRootUrl().'tests/resources/redirector.php?target='.urlencode('ftps://my.local'), 'curl', false, '/curl_exec: Protocol "ftps" not supported or disabled in libcurl/'],
+            [Fixture::getRootUrl().'tests/resources/redirector.php?target='.urlencode('ftps://my.local'), 'socket', false, '/Protocol ftps not in list of allowed protocols/'],
+            //[Fixture::getRootUrl().'tests/resources/redirector.php?target='.urlencode('ftps://my.local'), 'fopen', false, ''],
+        ];
+    }
+
     public function test_http_postsEvent()
     {
         $params = null;
@@ -434,6 +473,43 @@ class HttpTest extends \PHPUnit\Framework\TestCase
             ['ftp://usful.ftp/file.md', 'Protocol ftp not in list of allowed protocols: http,https'],
             ['rtp://custom.url', 'Protocol rtp not in list of allowed protocols: http,https'],
             ['/local/file', 'Missing scheme in given url'],
+        ];
+    }
+
+    /**
+     * @dataProvider getBlockedHostUrls
+     */
+    public function test_blocked_hosts($url, $isValid, $message='')
+    {
+        EventDispatcher::getInstance()->addObserver('Http.sendHttpRequest', function($aUrl, $httpEventParams, &$response, &$status, &$headers) {
+            $response = 'prevented request';
+        });
+
+        StaticContainer::getContainer()->set('http.blocklist.hosts', [
+            '*.amazonaws.com',
+            'matomo.org',
+            'piwik.*'
+        ]);
+
+        if (!$isValid) {
+            self::expectException(\Exception::class);
+            self::expectExceptionMessage($message);
+        }
+
+        self::assertEquals('prevented request', Http::sendHttpRequest($url, 5));
+    }
+
+    public function getBlockedHostUrls()
+    {
+        return [
+            ['https://test.amazonaws.com/test/download', false, 'Hostname test.amazonaws.com is in list of disallowed hosts'],
+            ['https://s3.us-west-2.amazonaws.com/mybucket/puppy.jpg', false, 'Hostname s3.us-west-2.amazonaws.com is in list of disallowed hosts'],
+            ['https://s3.us-west-2.amazonaws.de/mybucket/puppy.jpg', true],
+            ['https://matomo.org', false, 'Hostname matomo.org is in list of disallowed hosts'],
+            ['https://builds.matomo.org', true],
+            ['https://piwik.org', false, 'Hostname piwik.org is in list of disallowed hosts'],
+            ['https://piwik.com.ax', false, 'Hostname piwik.com.ax is in list of disallowed hosts'],
+            ['https://de.piwik.org', true],
         ];
     }
 }

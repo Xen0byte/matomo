@@ -22,7 +22,9 @@ if (!empty($_GET['plugin'])
 }
 
 try {
+    @ob_start();
     $mysql = include_once $root . "/tests/PHPUnit/bootstrap.php";
+    @ob_end_clean();
 } catch (Exception $e) {
     echo 'alert("ERROR, not all tests are running! --> ' . $e->getMessage() .  '")';
     $mysql = false;
@@ -1012,6 +1014,7 @@ function PiwikTest() {
         strictEqual(actual, _e('firstLink'), "findFirstNodeHavingAttributeWithValue, should find first link within body");
 
         actual = query.findFirstNodeHavingAttributeWithValue(document.body, 'src');
+
         strictEqual(actual, _e('image2'), "findFirstNodeHavingAttributeWithValue, should not return first image which has empty src attribute");
 
 
@@ -4113,7 +4116,7 @@ if ($mysql) {
             var countTrackingEvents = /<span\>([0-9]+)\<\/span\>/.exec(results);
             ok (countTrackingEvents, "countTrackingEvents is set");
             if(countTrackingEvents) {
-                equal( countTrackingEvents[1], "43", "count tracking events" );
+                equal( countTrackingEvents[1], "44", "count tracking events" );
             }
 
             // firing callback
@@ -4992,6 +4995,21 @@ if ($mysql) {
         tracker.disableCookies();
         ok(!tracker.areCookiesEnabled(), 'disable cookies always disables cookies');
         tracker.forgetCookieConsentGiven();
+    });
+
+    test("Test API - set cookie domain", function() {
+        expect(5);
+
+        var tracker = Piwik.getTracker();
+        var cookie_domain = tracker.getCookieDomain()
+        var test_domain = '.' + cookie_domain;
+
+        tracker.setCookieDomain(cookie_domain + '.broken.tld')
+        equal(tracker.getCookieDomain(), cookie_domain, "can't set a bad cookie domain" );
+
+        tracker.requireCookieConsent();
+        tracker.setCookieDomain(test_domain);
+        equal(tracker.getCookieDomain(), test_domain, "can set cookie domain after requireCookieConsent disables cookies" );
     });
 
     test("Test API - optOut (via consent feature)", function () {

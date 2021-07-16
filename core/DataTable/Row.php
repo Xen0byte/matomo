@@ -33,7 +33,7 @@ class Row extends \ArrayObject
      * @var array
      */
     private static $unsummableColumns = array(
-        'label'    => true,
+        'label' => true,
         'full_url' => true // column used w/ old Piwik versions,
     );
 
@@ -47,6 +47,8 @@ class Row extends \ArrayObject
      * @internal
      */
     public $subtableId = null;
+
+    private $isSummaryRow = false;
 
     const COLUMNS = 0;
     const METADATA = 1;
@@ -406,8 +408,8 @@ class Row extends \ArrayObject
      * Add many columns to this row.
      *
      * @param array $columns Name/Value pairs, e.g., `array('name' => $value , ...)`
-     * @throws Exception if any column name does not exist.
      * @return void
+     * @throws Exception if any column name does not exist.
      */
     public function addColumns($columns)
     {
@@ -557,7 +559,7 @@ class Row extends \ArrayObject
                 // we need to aggregate value before value is overwritten by maybe another row
                 foreach ($aggregationOperations as $column => $operation) {
                     $thisMetadata = $this->getMetadata($column);
-                    $sumMetadata  = $rowToSum->getMetadata($column);
+                    $sumMetadata = $rowToSum->getMetadata($column);
 
                     if ($thisMetadata === false && $sumMetadata === false) {
                         continue;
@@ -586,14 +588,18 @@ class Row extends \ArrayObject
     }
 
     /**
-     * Returns `true` if this row is the summary row, `false` if otherwise. This function
-     * depends on the label of the row, and so, is not 100% accurate.
+     * Returns `true` if this row was added to a datatable as the summary row, `false` if otherwise.
      *
      * @return bool
      */
     public function isSummaryRow()
     {
-        return $this->getColumn('label') === DataTable::LABEL_SUMMARY_ROW;
+        return $this->isSummaryRow;
+    }
+
+    public function setIsSummaryRow()
+    {
+        $this->isSummaryRow = true;
     }
 
     /**
@@ -637,8 +643,10 @@ class Row extends \ArrayObject
                 $thisColumnValue = 0;
             } else if (!is_numeric($thisColumnValue)) {
                 $label = $this->getColumn('label');
+                $thisColumnDescription = $this->getColumnValueDescriptionForError($thisColumnValue);
+                $columnToSumValueDescription = $this->getColumnValueDescriptionForError($columnToSumValue);
                 throw new \Exception(sprintf('Trying to sum unsupported operands for column %s in row with label = %s: %s + %s',
-                    $columnName, $label, gettype($thisColumnValue), gettype($columnToSumValue)));
+                    $columnName, $label, $thisColumnDescription, $columnToSumValueDescription));
             }
 
             return $thisColumnValue + $columnToSumValue;
@@ -772,5 +780,14 @@ class Row extends \ArrayObject
             ));
             StaticContainer::get(LoggerInterface::class)->warning("{exception}", ['exception' => $ex]);
         }
+    }
+
+    private function getColumnValueDescriptionForError($value)
+    {
+        $result = gettype($value);
+        if (is_array($result)) {
+            $result .= ' ' . json_encode($value);
+        }
+        return $result;
     }
 }
